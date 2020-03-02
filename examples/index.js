@@ -1,8 +1,7 @@
 import { createStore, combineReducers, applyMiddleware } from '../node_modules/redux/es/redux.mjs';
 import { booksReducer, userReducer } from './reducers.js';
-import createSagaMiddleware from '../saga.js';
+import createSagaMiddleware from '../index.js';
 import { rootSaga } from './sagas.js';
-import { USER_ACTION_TYPES } from './actions.js';
 
 const sagaMiddleware = createSagaMiddleware();
 const rootReducer = combineReducers({
