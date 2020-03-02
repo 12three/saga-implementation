@@ -1,9 +1,13 @@
-import { put, select } from '../saga.js';
-import { userSetName } from './actions.js';
+import { put, select, take } from '../saga.js';
+import { userSetName, USER_ACTION_TYPES } from './actions.js';
 
 export function* rootSaga() {
-  yield put(userSetName('Alena'));
-  const name = yield select(state => state.user.name);
-  console.log(name);
+  while(true) {
+    const { payload } = yield take(USER_ACTION_TYPES.SET_NAME);
+    yield put(userSetName(payload));
+
+    const name = yield select(state => state.user.name);
+    console.log(name);
+  }
 }
 

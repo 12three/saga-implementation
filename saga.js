@@ -19,8 +19,7 @@ export const fork = (fn, ...args) => ({ type: EFFECT_TYPES.FORK, fn, args })
   - takeEvery
 */
 
-const runSaga = async (store, saga) => {
-
+const runSaga = async (store, saga, actionMonitor) => {
   const iterator = saga();
   let result = iterator.next();
 
@@ -28,6 +27,14 @@ const runSaga = async (store, saga) => {
     const effect = result.value;
 
     switch (effect.type) {
+      case EFFECT_TYPES.TAKE:
+        const action = await new Promise(resolve => {
+          return actionMonitor.once(effect.actionType, resolve);
+        });
+
+        result = iterator.next( action );
+        break;
+
       case EFFECT_TYPES.CALL:
         result = iterator.next( await effect.fn(...effect.args) );
         break;
@@ -52,19 +59,44 @@ const runSaga = async (store, saga) => {
   }
 }
 
+class ActionMonitor {
+  handlers = [];
+
+  emit(action) {
+    this.handlers = this.handlers.reduce((acc, handler) => {
+
+      if (handler.actionType === action.type) {
+        handler.fn(action);
+        return acc;
+      }
+
+      return [
+        ...acc,
+        handler,
+      ]
+    }, []);
+  };
+
+  once(actionType, fn) {
+    this.handlers.push({ actionType, fn })
+  };
+}
+
 export default function sagaMiddlewareFactory() {
+  const actionMonitor = new ActionMonitor();
   let boundRunSaga;
 
   const sagaMiddleware = store => {
     boundRunSaga = runSaga.bind(null, store);
 
     return next => action => {
+      actionMonitor.emit(action)
       return next(action);
     };
   }
 
   sagaMiddleware.run = (saga) => {
-    boundRunSaga(saga);
+    boundRunSaga(saga, actionMonitor);
   }
 
   return sagaMiddleware;
