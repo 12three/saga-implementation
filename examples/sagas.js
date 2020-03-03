@@ -1,4 +1,4 @@
-import { put, select, take } from '../saga.js';
+import { put, select, take } from '../index.js';
 import { userSetName, USER_ACTION_TYPES } from './actions.js';
 
 export function* rootSaga() {
