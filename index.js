@@ -5,6 +5,7 @@ const EFFECT_TYPES = {
   PUT: 'PUT',
   FORK: 'FORK',
   ALL: 'ALL',
+  RACE: 'RACE',
 }
 
 export const take = actionType => ({ type: EFFECT_TYPES.TAKE, actionType });
@@ -12,9 +13,21 @@ export const select = selector => ({ type: EFFECT_TYPES.SELECT, selector });
 export const call = (fn, ...args) => ({ type: EFFECT_TYPES.CALL, fn, args });
 export const put = action => ({ type: EFFECT_TYPES.PUT, action });
 export const fork = (fn, ...args) => ({ type: EFFECT_TYPES.FORK, fn, args });
+export const all = (effects = []) => ({ type: EFFECT_TYPES.ALL, effects });
+export const race = (effects = []) => ({ type: EFFECT_TYPES.RACE, effects });
+
+/* TODO: implement:
+  - takeEvery
+*/
 
 async function handleEffect(effect, store, actionMonitor) {
   switch (effect.type) {
+    case EFFECT_TYPES.ALL:
+      return await Promise.all(effect.effects.map(effct => handleEffect(effct)));
+
+    case EFFECT_TYPES.RACE:
+        return await Promise.race(effect.effects.map(effct => handleEffect(effct)));
+
     case EFFECT_TYPES.TAKE:
       return await new Promise(resolve => {
         return actionMonitor.once(effect.actionType, resolve);

@@ -2,6 +2,7 @@ import { createStore, combineReducers, applyMiddleware } from '../node_modules/r
 import { booksReducer, userReducer } from './reducers.js';
 import createSagaMiddleware from '../index.js';
 import { rootSaga } from './sagas.js';
+import { userSetName } from './actions.js';
 
 const sagaMiddleware = createSagaMiddleware();
 const rootReducer = combineReducers({

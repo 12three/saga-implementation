@@ -1,13 +1,11 @@
-import { put, select, take } from '../index.js';
+import { put, select, take, call, race, all } from '../index.js';
 import { userSetName, USER_ACTION_TYPES } from './actions.js';
 
-export function* rootSaga() {
-  while(true) {
-    const { payload } = yield take(USER_ACTION_TYPES.SET_NAME);
-    yield put(userSetName(payload));
-
-    const name = yield select(state => state.user.name);
-    console.log(name);
-  }
+function delay(fn, ms) {
+  return (...args) => new Promise(resolve => {
+    setTimeout(() => {
+      resolve(fn(...args));
+    }, ms);
+  })
 }
 
